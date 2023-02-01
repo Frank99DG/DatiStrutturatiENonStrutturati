@@ -1,3 +1,2 @@
 
-import pandas as pd
-print('Ciao')
+from bs4 import BeautifulSoup
