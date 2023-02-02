@@ -1,4 +1,4 @@
-import Prova as pr
+import scraping as pr
 import sqlite3
 
 
