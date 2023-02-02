@@ -26,3 +26,5 @@ def insert_node(parent_id,childs, cur, con):
         con.commit()
         node_id = cur.lastrowid
         insert_node(node_id, child["childs"], cur, con )
+
+        chan
