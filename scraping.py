@@ -18,7 +18,7 @@ def children(soup, i = 1, j = 0, results = []):
     for child in tags:
         #print("i = {0}, j = {1}, child = \n{2}\n\n".format(i, j, child))
         #results += [(id, str(child), j)]
-        children(child, i + k, id, results)
+        children(child, i  + k, id, results)
         k -= 1
         id += 1
     return results
