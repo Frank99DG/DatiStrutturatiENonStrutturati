@@ -179,18 +179,18 @@ def get_title_page(cur, url):
 
 def insert_medicine(cur, con, name):
     query = '''
-        WITH RECURSIVE padre_figli (id, id_padre, tag_padre, value)
+            WITH RECURSIVE padre_figli (id, id_padre, tag_padre, value)
                     AS ( select id, parent_id, tag, value --Questa seleziona il nodo padre da cui esplorare
                         FROM nodes
                         WHERE id = (select n.id
-									from nodes n
-									where n.attributes like %s)
-                        
+                                    from nodes n
+                                    where n.attributes like %s order by n.id desc limit 1)
+
                         union
-                        
+
                         SELECT nodes.id, nodes.parent_id,
-                        		(SELECT n.tag FROM nodes as n WHERE id = nodes.parent_id),
-                        		nodes.value
+                                (SELECT n.tag FROM nodes as n WHERE id = nodes.parent_id),
+                                nodes.value
                         FROM nodes, padre_figli
                         WHERE nodes.parent_id = padre_figli.id)
                     SELECT string_agg(value, ' ' order by padre_figli.id asc) as text_content -- Si ordina per id per riordinare correttamente le stringhe
