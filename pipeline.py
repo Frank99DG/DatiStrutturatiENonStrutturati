@@ -20,9 +20,8 @@ if __name__=="__main__":
         print("Cerco i sinonimi di " + word)
         print()
         if wn.synsets(word) != []:
-            for synset in wn.synsets(word):
-                print("Sinonimi di " + word + ":")
-                sinonimi += synset.lemma_names()          
+            sinonimi += wn.synsets(word)[0].lemma_names()        
         print("--------------------------------------------------")
-    print(sinonimi)
+    symptoms += list(set(sinonimi))
+    print(symptoms)
     
