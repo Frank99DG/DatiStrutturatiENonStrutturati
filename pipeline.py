@@ -49,7 +49,7 @@ def select_review (cur,con,med_name):
     query = '''SELECT review_data from reviews where drug =%(content)s'''
     cur.execute(query, {"content":med_name})
     results = cur.fetchall()
-    return cur,con,results
+    return list(map(lambda x: x[0], results))
 
 if __name__=="__main__":
     main()    
