@@ -4,7 +4,6 @@ import time
 import re
 import psycopg2
 
-med_name = 'hydrochlorothiazide'
 url = 'https://www.webmd.com/drugs/drugreview-5310-hydrochlorothiazide-oral?conditionid=&sortval=1&page='
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
