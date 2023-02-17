@@ -3,10 +3,15 @@ import requests
 import time
 import re
 import psycopg2
+from progress.bar import Bar
 
-med_name = 'hydrochlorothiazide'
-url = 'https://www.webmd.com/drugs/drugreview-5310-hydrochlorothiazide-oral?conditionid=&sortval=1&page='
+# Variabili globali
+med_name = 'amoxicillin'
+url = 'https://www.webmd.com/drugs/drugreview-1531-amoxicillin-oral\
+    ?drugid=1531&drugname=amoxicillin-tablet\
+    -multiphase-24-hr-tablet-er-hr'
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+
 
 # Dizionari dati
 kind_dict = {"Patient": 'P',
@@ -120,35 +125,35 @@ def init_postgres():
     con = psycopg2.connect("user=postgres password=admin")
     con.autocommit=True
     cur = con.cursor()
-    cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = 'user_reviews'")
+    cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = 'scraping'")
     exists = cur.fetchone()
     if not exists:
-        cur.execute('CREATE DATABASE user_reviews')
+        cur.execute('CREATE DATABASE scraping')
         con.commit()
     cur.close()
     con.close()
-    con = psycopg2.connect("dbname=user_reviews user=postgres password=admin")
+    con = psycopg2.connect("dbname=scraping user=postgres password=admin")
     cur = con.cursor()
 
     return cur,con
 
 def create_types(cur, con):
-    query = '''drop type if exists drug cascade;
+    query = '''--drop type if exists drug cascade;
 create type drug as(
 	name varchar(255)
 );
 
-drop type if exists illness cascade;
+--drop type if exists illness cascade;
 create type illness as(
 	name VARCHAR(100)
 );
 
-drop type if exists review_text cascade;
+--drop type if exists review_text cascade;
 create type review_text as(
 	text text
 );
 	
-drop type if exists patient_data cascade;
+--drop type if exists patient_data cascade;
 CREATE TYPE patient_data AS(
 	name VARCHAR(255),
 	age int array[2],
@@ -157,19 +162,19 @@ CREATE TYPE patient_data AS(
     );'''
     cur.execute(query)
     con.commit()
-    return 'francesco sei un coglione perchè dici le stesse cazzate di domenico'
+    return 1
 
 def create_tables(cur, con):
-    query = '''drop table if exists drugs cascade;
-create table drugs of drug;
-alter table drugs
-	add primary key (name);
+    query = '''--drop table if exists drugs cascade;
+    --create table if not exists drugs of drug;
+    --alter table drugs
+	--add primary key (name);
 
-drop table if exists illnesses cascade;
-create table illnesses of illness;
+--drop table if exists illnesses cascade;
+create table if not exists illnesses of illness;
 alter table illnesses add primary key(name);
 
-drop table if exists patients cascade;
+--drop table if exists patients cascade;
 CREATE TABLE if not exists patients (
 	id serial primary key,
 	data patient_data,
@@ -181,8 +186,8 @@ CREATE TABLE if not exists patients (
 	);
 
 
-drop table if exists reviews cascade;
-create table reviews (
+--drop table if exists reviews cascade;
+create table if not exists reviews (
     ID serial,
 	review_data review_text,
 	drug VARCHAR(255),
@@ -191,7 +196,7 @@ create table reviews (
 	foreign key(patient_id) references patients(id));'''
     cur.execute(query)
     con.commit()
-    return 'domenico sei un coglione'
+    return 1
 
 def insert_patient(cur, con, data):
     query = '''INSERT INTO patients(data, drug, illness, time_on_medication) values
@@ -222,38 +227,50 @@ def insert_review(cur, con, data, last_id):
     con.commit()
     return 1
 
-def main():
-    #Inizializzazione database ed inserimento medicina
-    cur, con = init_postgres()
-    create_types(cur,con)
-    create_tables(cur,con)
-    drug_query = '''SELECT * FROM drugs WHERE name = '{}' '''.format(med_name)
-    cur.execute(drug_query)
-    exists = cur.fetchone()
-    if not exists:
-        insert_drug(cur, con, med_name)
+def timer(seconds):
+    """Aspetta per (seconds) secondi, mostrando una barra a schermo."""
+    with Bar('Waiting', suffix = '%(eta)ds') as bar:
+        for _ in range(100):
+            time.sleep(seconds / 100)
+            bar.next()
 
 
-    # Estrazione della prima pagina
-    soup = page_soup(url, headers)
-
-    # Estraggo la parte con le recensioni
-    reviews_container = soup.find("div", class_ = "shared-reviews-container")
-    # In fondo alla pagina c'è un elemento grafico con i numeri delle pagine. Estraggo l'ultima pagina
-    lastpage_container = reviews_container.find_all('a',class_="page-link")[-1]
-    lastpage = int(lastpage_container.string)
-
-    for page_number in range(1, lastpage + 1):
-        page_url = url + str(page_number)
-        soup = page_soup(page_url, headers)
-        reviews_container = soup.find("div", class_ = "shared-reviews-container") # Questo elemento della pagina contiene tutte le recensioni
-        reviews_soup = reviews_container.find_all("div", class_ = "review-details-holder") # Questi sono i contenitori delle recensioni
-        extract_reviews(reviews_soup, cur, con)
-
-        print('La pagina %d è stata inserita' % page_number)
-        time.sleep(20) # Timer aggiunto per evitare il ban
-    cur.close()
-    con.close()
+#Inizializzazione database ed inserimento medicina
+cur, con = init_postgres()
+# Tipi e tabelle devono essere creati solamente la prima volta
+create_types(cur,con)
+create_tables(cur,con)
+## Non inseriamo le medicine perchè ci aspettiamo che siano state inserite eseguendo la webextension.
+# drug_query = '''SELECT * FROM drugs WHERE name = '{}' '''.format(med_name)
+# cur.execute(drug_query)
+# exists = cur.fetchone()
+# if not exists:
+#     insert_drug(cur, con, med_name)
 
 
-if __name__== '__main__': main()
+# Estrazione della prima pagina
+# A volte si può dimenticare di aggiungere la selezione della pagina. Questo risulta in righe duplicate nel database.
+if not re.search(r'&page=\d*$', url):
+    print('Ho sostituito {} con {}'.format(url, url + '&page='))
+    url += '&page='
+    print
+soup = page_soup(url, headers)
+
+# Estraggo la parte con le recensioni
+reviews_container = soup.find("div", class_ = "shared-reviews-container")
+# In fondo alla pagina c'è un elemento grafico con i numeri delle pagine. Estraggo l'ultima pagina
+lastpage_container = reviews_container.find_all('a',class_="page-link")[-1]
+lastpage = int(lastpage_container.string)
+
+for page_number in range(1, lastpage + 1):
+    page_url = url + str(page_number)
+    soup = page_soup(page_url, headers)
+    reviews_container = soup.find("div", class_ = "shared-reviews-container") # Questo elemento della pagina contiene tutte le recensioni
+    reviews_soup = reviews_container.find_all("div", class_ = "review-details-holder") # Questi sono i contenitori delle recensioni
+    extract_reviews(reviews_soup, cur, con)
+
+    print('La pagina %d di %d è stata inserita' % (page_number, lastpage))
+    timer(20) # Timer aggiunto per evitare il ban
+
+cur.close()
+con.close()
