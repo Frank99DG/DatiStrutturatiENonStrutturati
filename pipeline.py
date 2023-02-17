@@ -15,8 +15,8 @@ def find_symptoms():
             symptoms.append(line.strip())
     symptoms = list(map(lambda x: x.lower(), set(symptoms)))
     #print(symptoms)
-    n = len(symptoms)
-    sinonimi =[]
+    #n = len(symptoms)
+    sinonimi = []
     for word in symptoms:
         #print("Cerco i sinonimi di " + word)
         #print()
@@ -26,9 +26,9 @@ def find_symptoms():
     symptoms += list(set(sinonimi))
     return list(set(symptoms))
 
-def get_tf_idf(text, trovati):
-    TFIDF_vectorizer = TfidfVectorizer(vocabulary = trovati)
-    tfidf_vectors = TFIDF_vectorizer.fit_transform([text])
+def get_tf_idf(recensioni, vocabolario):
+    TFIDF_vectorizer = TfidfVectorizer(vocabulary = vocabolario)
+    tfidf_vectors = TFIDF_vectorizer.fit_transform(recensioni)
     print(TFIDF_vectorizer.get_feature_names_out())
     print(tfidf_vectors)
     for i in range (len(tfidf_vectors.toarray())):
@@ -36,9 +36,14 @@ def get_tf_idf(text, trovati):
 
 def main():
     sinonimi = find_symptoms()
-    #print(sinonimi)
-    get_tf_idf("urticaria urticaria urticaria urticaria suca cazzp palle", sinonimi)
+    get_tf_idf(["urticaria urticaria", "urticaria urticaria burping suca cazzp palle"], sinonimi)
     
+
+def select_review (cur,con,med_name):
+    query = '''SELECT review_data from reviews where drug =%(content)s'''
+    cur.execute(query, {"content":med_name})
+    results = cur.fetchall()
+    return cur,con,results
 
 if __name__=="__main__":
     main()    
