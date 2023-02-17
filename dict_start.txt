@@ -1,0 +1,153 @@
+Abdominal Pain
+Acid Reflux
+Heartburn
+Airsickness
+Motion Sickness
+Belching
+Gas
+Bellyache
+Abdominal Pain
+Bleeding
+Gastrointestinal Bleeding
+Breath Odor
+Bad Breath
+Breathing Problems
+Bruises
+Burping
+Carsickness
+Chest Pain
+Chilblains
+Frostbite
+Choking
+Chronic Pain
+Cluster Headache
+Headache
+Cold
+Temperature
+Frostbite
+Hypothermia
+Communication Disorders
+Speech and Communication Disorders
+Constipation
+Contusions
+Bruises
+Cough
+Dehydration
+Diarrhea
+Dizziness
+Vertigo
+Dropsy
+Edema
+Dysentery
+Diarrhea
+Dysfunctional uterine bleeding
+Vaginal Bleeding
+Dyspepsia
+Indigestion
+Dyspnea
+Breathing Problems
+Edema
+Fainting
+Fatigue
+Fever
+Flatulence
+Frostbite
+Frostnip
+Frostbite
+Gas
+Gastrointestinal Bleeding
+GI Bleeding
+Gastrointestinal Bleeding
+Halitosis
+Bad Breath
+Headache
+Heartburn
+Heat Exhaustion
+Heat Illness
+Heimlich Maneuver
+Choking
+Hematoma
+Bleeding
+Hemorrhage
+Bleeding
+Hives
+Hot
+Fever
+Heat Illness
+Hypothermia
+Icterus
+Jaundice
+Indigestion
+Itching
+Jaundice
+Kernicterus
+Jaundice
+Language Problems
+Speech
+Communication Disorders
+Motion Sickness
+Nausea
+Vomiting
+Pain
+Abdominal
+Abdominal Pain
+Chest
+Chest Pain
+Chronic
+Chronic Pain
+Pelvic Pain
+Pruritus
+Itching
+Pyrexia
+Fever
+Rare Diseases
+Raynaud's Disease
+Rectal Bleeding
+Gastrointestinal Bleeding
+Sciatica
+Seasickness
+Motion Sickness
+Shortness of Breath
+Breathing Problems
+Speech and Communication Disorders
+Stammering
+Stuttering
+Stomach Ache
+Abdominal Pain
+Stuttering
+Sunstroke
+Heat Illness
+Swelling
+Edema
+Syncope
+Fainting
+Tachypnea
+Breathing Problems
+Tension Headache
+Headache
+Thirst
+Dehydration
+Tiredness
+Fatigue
+Upset Stomach
+Indigestion
+Urticaria
+Hives
+Uterine bleeding
+Vaginal Bleeding
+Vaginal Bleeding
+Vascular Headache
+Headache
+Vasovagal Syncope
+Fainting
+Vertigo
+Dizziness
+Vertigo
+Vestibular Diseases
+Dizziness
+Vertigo
+Vomiting
+Nausea
+Vomiting
+Weariness
+Fatigue
