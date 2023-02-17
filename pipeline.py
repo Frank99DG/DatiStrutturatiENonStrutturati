@@ -39,6 +39,12 @@ def main():
     get_tf_idf(["urticaria urticaria", "urticaria urticaria burping suca cazzp palle"], sinonimi)
     
 
+def list_drug_names (cur,con):
+    query = '''SELECT name from drugs'''
+    cur.execute(query)
+    results = cur.fetchall()
+    return list(map(lambda x: x[0], results))
+
 def select_review (cur,con,med_name):
     query = '''SELECT review_data from reviews where drug =%(content)s'''
     cur.execute(query, {"content":med_name})
