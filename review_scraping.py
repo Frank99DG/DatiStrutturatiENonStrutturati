@@ -148,7 +148,7 @@ create type t_illness as(
 	name VARCHAR(100)
 );
 
---drop type if exists t_review_text cascade;
+--drop type if exists review_text cascade;
 create type t_review_text as(
 	text text
 );
@@ -181,8 +181,8 @@ CREATE TABLE if not exists candidate_patient (
 	drug VARCHAR(255),
 	illness VARCHAR(100),
 	time_on_medication float array[2],
-	foreign key(drug) references drugs,
-	foreign key(illness) references illnesses(name)
+	foreign key(drug) references drug,
+	foreign key(illness) references illness(name)
 	);
 
 
@@ -234,7 +234,7 @@ def timer(seconds):
             time.sleep(seconds / 100)
             bar.next()
 
-
+    
 #Inizializzazione database ed inserimento medicina
 cur, con = init_postgres()
 # Tipi e tabelle devono essere creati solamente la prima volta
