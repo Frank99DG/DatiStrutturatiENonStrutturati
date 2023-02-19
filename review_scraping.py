@@ -103,7 +103,7 @@ def extract_reviews(soup, cur, con):
 
         # Popolamento database
         #print('sto inserendo {}'.format(data))
-        illness_query = '''SELECT * FROM illnesses WHERE name = '{}'
+        illness_query = '''SELECT * FROM illness WHERE name = '{}'
         '''.format(data[5])
         cur.execute(illness_query)
         exists = cur.fetchone()
@@ -138,18 +138,18 @@ def init_postgres():
     return cur,con
 
 def create_types(cur, con):
-    query = '''--drop type if exists drug cascade;
-create type drug as(
+    query = '''--drop type if exists t_drug cascade;
+create type t_drug as(
 	name varchar(255)
 );
 
---drop type if exists illness cascade;
-create type illness as(
+--drop type if exists t_illness cascade;
+create type t_illness as(
 	name VARCHAR(100)
 );
 
---drop type if exists review_text cascade;
-create type review_text as(
+--drop type if exists t_review_text cascade;
+create type t_review_text as(
 	text text
 );
 	
@@ -165,17 +165,17 @@ CREATE TYPE patient_data AS(
     return 1
 
 def create_tables(cur, con):
-    query = '''--drop table if exists drugs cascade;
-    --create table if not exists drugs of drug;
-    --alter table drugs
+    query = '''--drop table if exists drug cascade;
+    --create table if not exists drug of t_drug;
+    --alter table drug
 	--add primary key (name);
 
---drop table if exists illnesses cascade;
-create table if not exists illnesses of illness;
-alter table illnesses add primary key(name);
+--drop table if exists illness cascade;
+create table if not exists illness of t_illness;
+alter table illness add primary key(name);
 
---drop table if exists patients cascade;
-CREATE TABLE if not exists patients (
+--drop table if exists candidate_patient cascade;
+CREATE TABLE if not exists candidate_patient (
 	id serial primary key,
 	data patient_data,
 	drug VARCHAR(255),
@@ -186,20 +186,20 @@ CREATE TABLE if not exists patients (
 	);
 
 
---drop table if exists reviews cascade;
-create table if not exists reviews (
+--drop table if exists review cascade;
+create table if not exists review (
     ID serial,
 	review_data review_text,
 	drug VARCHAR(255),
 	patient_id int,
 	foreign key(drug) references drugs,
-	foreign key(patient_id) references patients(id));'''
+	foreign key(patient_id) references candidate_patient(id));'''
     cur.execute(query)
     con.commit()
     return 1
 
 def insert_patient(cur, con, data):
-    query = '''INSERT INTO patients(data, drug, illness, time_on_medication) values
+    query = '''INSERT INTO candidate_patient(data, drug, illness, time_on_medication) values
     ( (%s, %s, %s, %s), %s, %s, %s)
     RETURNING id
     '''
@@ -209,20 +209,20 @@ def insert_patient(cur, con, data):
     return id
 
 def insert_drug(cur, con, med_name):
-    query = '''INSERT INTO drugs VALUES('{}')
+    query = '''INSERT INTO drug VALUES('{}')
     '''.format(med_name)
     cur.execute(query)
     con.commit()
     return 1
 
 def insert_illness(cur, con, data):
-    query = '''INSERT INTO illnesses VALUES('{}')'''.format(data[5])
+    query = '''INSERT INTO illness VALUES('{}')'''.format(data[5])
     cur.execute(query)
     con.commit()
     return 1
 
 def insert_review(cur, con, data, last_id):
-    query = '''INSERT INTO reviews(review_data.text, drug, patient_id) VALUES(%s, %s, %s)'''
+    query = '''INSERT INTO review(review_data.text, drug, patient_id) VALUES(%s, %s, %s)'''
     cur.execute(query, (data[-1], med_name, last_id))
     con.commit()
     return 1

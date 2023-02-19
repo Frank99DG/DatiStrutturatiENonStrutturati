@@ -136,7 +136,7 @@ def init_postgres():
                 parent_id INTEGER,
                 FOREIGN KEY (parent_id) REFERENCES nodes(id) ON DELETE CASCADE)'''
     
-    query_medicine = '''CREATE TABLE IF NOT EXISTS drugs(
+    query_medicine = '''CREATE TABLE IF NOT EXISTS drug(
                 name text primary key,
                 uses text,
                 side_effects text,
@@ -204,7 +204,7 @@ def insert_medicine(cur, con, name):
         console_log('Ho eseguito la query ' + attribute)
         result_list.append(cur.fetchone()[0]) # cur.fetchone()[0] è il valore delle stringhe concatenate (vedi select string_agg)
     
-    pop_query = '''INSERT INTO drugs(name, uses, interactions, precautions, side_effects, overdose) values (%s, %s, %s, %s, %s, %s)'''
+    pop_query = '''INSERT INTO drug(name, uses, interactions, precautions, side_effects, overdose) values (%s, %s, %s, %s, %s, %s)'''
     console_log('Eseguo la query di popolamento')
     cur.execute(pop_query, (name, *result_list))
     console_log('Ho eseguito la query di popolamento')
