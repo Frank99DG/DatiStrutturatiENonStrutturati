@@ -8,11 +8,6 @@ from progress.bar import Bar
 # Variabili globali
 
 drugs_dict={'Loperamide':'https://www.webmd.com/drugs/drugreview-4789-loperamide-oral?drugid=4789&drugname=loperamide-liquid'}
-
-#med_name = 'amoxicillin'
-#url = 'https://www.webmd.com/drugs/drugreview-1531-amoxicillin-oral\
-   # ?drugid=1531&drugname=amoxicillin-tablet\
-    #-multiphase-24-hr-tablet-er-hr'
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
 
@@ -219,13 +214,6 @@ def insert_patient(cur, con, data, med_name):
     con.commit()
     return id
 
-#def insert_drug(cur, con, med_name):
- #   query = '''INSERT INTO drug VALUES('{}')
-  #  '''.format(med_name)
-   # cur.execute(query)
-    #con.commit()
-    #return 1
-
 def insert_illness(cur, con, data):
     query = '''INSERT INTO illness VALUES('{}')'''.format(data[5])
     cur.execute(query)
@@ -246,18 +234,11 @@ def timer(seconds):
             bar.next()
 
     
-#Inizializzazione database ed inserimento medicina
+#Inizializzazione database
 cur, con = init_postgres()
 # Tipi e tabelle devono essere creati solamente la prima volta
 #create_types(cur,con)
 #create_tables(cur,con)
-## Non inseriamo le medicine perchè ci aspettiamo che siano state inserite eseguendo la webextension.
-# drug_query = '''SELECT * FROM drugs WHERE name = '{}' '''.format(med_name)
-# cur.execute(drug_query)
-# exists = cur.fetchone()
-# if not exists:
-#     insert_drug(cur, con, med_name)
-
 
 # Estrazione della prima pagina
 # A volte si può dimenticare di aggiungere la selezione della pagina. Questo risulta in righe duplicate nel database.
