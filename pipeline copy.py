@@ -145,7 +145,7 @@ def uses_query(cur, con, user_query):
                          reverse = True) # ordino per cosine similarity
     print('doc_ranking')
     for element in doc_ranking:
-        print(f'Medicinale: {element[0]:80}    Similarità: {element[1]:.3f}%')
+        print(f'Medicinale: {element[0]:80}    Similarità: {element[1]*100:.3f}%')
     
 
 
