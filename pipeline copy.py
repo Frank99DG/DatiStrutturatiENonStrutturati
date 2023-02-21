@@ -263,7 +263,7 @@ def main():
     review_list = select_review(cur, con, med_name)
     #get_tf_idf(cur, con, map(lambda x: x[0], review_list), map(lambda x: x[1], review_list), sinonimi)
     #tf_idf_plot(cur, con, med_name)
-    uses_query(cur, con, 'heart disease')
+    uses_query(cur, con, 'nauseous')
     cur.close()
     con.close()
 
