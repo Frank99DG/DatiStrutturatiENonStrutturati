@@ -143,7 +143,7 @@ def uses_query(cur, con, user_query):
     doc_ranking = sorted(list(zip(drug_list, sim)),
                          key = lambda e: e[1],
                          reverse = True) # ordino per cosine similarity
-    print('doc_ranking')
+    print('Ranking medicinali per la query: {}'.format(user_query))
     for element in doc_ranking:
         print(f'Medicinale: {element[0]:80}    Similarità: {element[1]*100:.3f}%')
     
@@ -263,7 +263,7 @@ def main():
     review_list = select_review(cur, con, med_name)
     #get_tf_idf(cur, con, map(lambda x: x[0], review_list), map(lambda x: x[1], review_list), sinonimi)
     #tf_idf_plot(cur, con, med_name)
-    uses_query(cur, con, 'infection')
+    uses_query(cur, con, 'heart disease')
     cur.close()
     con.close()
 
