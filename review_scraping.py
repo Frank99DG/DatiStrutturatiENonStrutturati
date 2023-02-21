@@ -158,9 +158,10 @@ create type t_illness as(
 	name VARCHAR(100)
 );
 
-drop type if exists review_text cascade;
-create type review_text as(
-	text text
+drop type if exists review_data cascade;
+create type review_data as(
+	text text,
+    vector real[]
 );
 	
 drop type if exists patient_data cascade;
@@ -199,7 +200,7 @@ CREATE TABLE if not exists candidate_patient (
 drop table if exists review cascade;
 create table if not exists review (
     ID serial,
-	review_data review_text,
+	review_data review_data,
 	drug VARCHAR(255),
 	patient_id int,
 	foreign key(drug) references drug,
