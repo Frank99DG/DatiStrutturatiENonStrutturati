@@ -7,7 +7,17 @@ from progress.bar import Bar
 
 # Variabili globali
 
-drugs_dict={'Loperamide':'https://www.webmd.com/drugs/drugreview-4789-loperamide-oral?drugid=4789&drugname=loperamide-liquid'}
+drugs_dict={'Amoxicillin ER 775 Mg Tablet,Extended Release 24Hr Mphase': 'https://www.webmd.com/drugs/drugreview-1531-amoxicillin-oral?drugid=1531&drugname=amoxicillin-tablet-multiphase-24-hr-tablet-er-hr',
+'Celexa':'https://www.webmd.com/drugs/drugreview-8603-celexa-oral?drugid=8603&drugname=celexa',
+'Hydrochlorothiazide':'https://www.webmd.com/drugs/drugreview-5310-hydrochlorothiazide-oral?drugid=5310&drugname=hydrochlorothiazide',
+'Methadone HCL Solution':'https://www.webmd.com/drugs/drugreview-2671-methadone-oral?drugid=2671&drugname=methadone-hcl-tablet-soluble',
+'Celebrex':'https://www.webmd.com/drugs/drugreview-16849-celebrex-oral?drugid=16849&drugname=celebrex',
+'Acetaminophen':'https://www.webmd.com/drugs/drugreview-362-acetaminophen-oral?drugid=362&drugname=acetaminophen',
+'Ambien':'https://www.webmd.com/drugs/drugreview-9690-ambien-oral?drugid=9690&drugname=ambien',
+'Lyrica':'https://www.webmd.com/drugs/drugreview-93965-lyrica-oral?drugid=93965&drugname=lyrica',
+'Benzonatate':'https://www.webmd.com/drugs/drugreview-14257-benzonatate-oral?drugid=14257&drugname=benzonatate',
+'Loperamide':'https://www.webmd.com/drugs/drugreview-4789-loperamide-oral?drugid=4789&drugname=loperamide-liquid'
+}
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
 
