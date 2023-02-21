@@ -1,14 +1,68 @@
 from bs4 import BeautifulSoup
+import psycopg2
 import requests
 import re
 import nltk
 from nltk.corpus import wordnet as wn
 from sklearn.feature_extraction.text import TfidfVectorizer
-from ping_pong import init_postgres
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import linear_kernel
 import spacy
 import matplotlib.pyplot as plt
 import pandas as pd
 en=spacy.load("en_core_web_sm")
+
+def init_postgres():
+    con = psycopg2.connect("user=postgres password=admin")
+    con.autocommit=True
+    cur = con.cursor()
+    cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = 'scraping'")
+    exists = cur.fetchone()
+    if not exists:
+        cur.execute('CREATE DATABASE scraping')
+        con.commit()
+    cur.close()
+    con.close()
+    con = psycopg2.connect("dbname=scraping user=postgres password=admin")
+    cur = con.cursor()
+#     query = '''CREATE TABLE IF NOT EXISTS documents (
+#                 url TEXT PRIMARY KEY,
+#                 title TEXT,
+#                 created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#                 content TEXT NOT NULL)'''
+
+    #create pages table
+    query_pages = '''CREATE TABLE IF NOT EXISTS pages (
+                id SERIAL PRIMARY KEY,
+                url TEXT NOT NULL,
+                created_date DATE DEFAULT CURRENT_TIMESTAMP,
+                id_node INTEGER NOT NULL,
+                FOREIGN KEY (id_node) REFERENCES nodes(id) ON DELETE CASCADE)'''
+
+    query_node = '''CREATE TABLE IF NOT EXISTS nodes (
+                id SERIAL PRIMARY KEY,
+                tag TEXT NOT NULL,
+                attributes TEXT,
+                value TEXT,
+                parent_id INTEGER,
+                FOREIGN KEY (parent_id) REFERENCES nodes(id) ON DELETE CASCADE)'''
+    
+    query_medicine = '''CREATE TABLE IF NOT EXISTS drug(
+                name text primary key,
+                uses text,
+                side_effects text,
+                precautions text,
+                interactions text,
+                overdose text
+    )
+    '''
+
+    #cur.execute(query)
+    cur.execute(query_node)
+    cur.execute(query_pages)
+    cur.execute(query_medicine)
+    con.commit()
+    return cur, con
 
 def check_nltk():
     nltk.download('stopwords')
@@ -16,6 +70,7 @@ def check_nltk():
     nltk.download('omw-1.4')
 
 def remove_stopwords(text):
+    # Probabilmente conviene cambiare dizionario di stopwords perchè restano troppe parole inutili
     sw = nltk.corpus.stopwords.words('english')
     return ' '.join(word for word in text.split() if word not in sw)
 
@@ -24,7 +79,7 @@ def lemmatize_text(text):
     return " ".join(lemmatizer.lemmatize(word) for word in text.split())
 
 def select_all_drugs(cur, con):
-    query = '''select name from drugs'''
+    query = '''select name from drug'''
     cur.execute(query)
     return map(lambda t: t[0],
         cur.fetchall())
@@ -39,16 +94,18 @@ def uses_query(cur, con, user_query):
     può essere calcolato sui primi k elementi, dove k=min{len(v1), len(v2)}. Questo è vero perchè gli elementi 'extra'
     del vettore più lungo sono parole che non esistevano nei documenti precedenti, e quindi corrispodnerebbero a valori
     nulli se si fosse usato il dizionario ampliato anche per i vettori più corti.'''
-    # Inizializziamo un vocabolario vuoto così da poter avere un vocabolario comune per analizzare
-    # tutto il corpus delle recensioni
-    vocabulary = []
-    tfidf_vectors = []
+    review_corpus = [] # Lista in cui ciascun elemento è la stringa di tutte le recensioni relative ad un singolo medicinale
+
     # Per ciascun medicinale, costruisco il tf_idf per l'intero corpus delle recensioni
-    for med_name in select_all_drugs(cur, con):
+    drug_list = list(select_all_drugs(cur, con))
+    for med_name in drug_list:
+        print('Sto estraendo le recensioni di {}'.format(med_name))
+
         # seleziono tutte le recensioni e ne elaboro il contenuto con nlp
         results = select_review(cur, con, med_name)
         ids = [result[0] for result in results]
         contents = [lemmatize_text(remove_stopwords(result[1])) for result in results]
+        #print(contents[0:4])
 
         # Rimuovo le recensioni senza testo
         new_ids = []
@@ -57,15 +114,39 @@ def uses_query(cur, con, user_query):
             if content:
                 new_ids.append(id)
                 new_contents.append(content)
+        #print(new_contents[0:4])
 
         # costruisco il tf_idf per il corpus delle recensioni
-        all_reviews = ' '.join(new_contents)
-
+        all_reviews = '' # Stringa che contiene tutte le recensioni relative ad un singolo medicinale
+        for review in new_contents:
+            #print(review, '\n')
+            all_reviews += review
+        
+        review_corpus.append(all_reviews)
+        print('Il corpus contiene {} recensioni'.format(len(review_corpus)))
+        #print(review_corpus[0:4])
         # tf-idf
-        TFIDF_vectorizer = TfidfVectorizer(lowercase = True)
-        tfidf_vectors += TFIDF_vectorizer.fit_transform(new_contents)
     
-    print(tf_idf_vectors)
+    review_corpus.append(lemmatize_text(remove_stopwords(user_query))) # Aggiungo alla fine la richiesta utente.
+    print('Il corpus contiene {} recensioni'.format(len(review_corpus)))
+    TFIDF_vectorizer = TfidfVectorizer(lowercase = True)
+    tfidf_vectors = TFIDF_vectorizer.fit_transform(review_corpus)
+
+    # Calcolo la cosine similarity fra tutte le recensioni utente e la query.
+    sim = cosine_similarity(tfidf_vectors[:-1], tfidf_vectors[-1])
+    # Avendo calcolato la cosine similarity tra un corpus di documenti ed una sola riga di testo, la
+    # cosine similarity è un vettore colonna.
+    sim = sim[:, 0]
+    print('cosine sim:', sim)
+
+    # Ranking medicinali
+    doc_ranking = sorted(list(zip(drug_list, sim)),
+                         key = lambda e: e[1],
+                         reverse = True) # ordino per cosine similarity
+    print('doc_ranking')
+    for element in doc_ranking:
+        print(f'Medicinale: {element[0]:80}    Similarità: {element[1]:.3f}%')
+    
 
 
 def tf_idf_plot(cur, con, med_name):
@@ -155,7 +236,7 @@ def get_tf_idf(cur, con, id_recensioni, testo_recensioni, vocabolario):
     #for i in range (len(tfidf_vectors.toarray())):
         #print(tfidf_vectors.toarray()[i,:])
 
-    query = '''update reviews
+    query = '''update review
 	set review_data.vector = %s
 	where id = %s;'''
     for id, vector in zip(id_recensioni, tfidf_vectors.toarray().tolist()):
@@ -170,19 +251,19 @@ def list_drug_names (cur, con):
 
 def select_review (cur, con, med_name):
     '''Restituisce le coppie (id, review_text) dal database delle recensioni'''
-    query = '''SELECT id, (review_data).text from reviews where drug =%(content)s'''
+    query = '''SELECT id, (review_data).text from review where drug =%(content)s'''
     cur.execute(query, {"content":med_name})
     results = cur.fetchall()
     return results
 
 def main():
-    med_name = 'amoxicillin'
+    med_name = 'Celexa'
     sinonimi = find_symptoms()
     cur, con = init_postgres()
     review_list = select_review(cur, con, med_name)
     #get_tf_idf(cur, con, map(lambda x: x[0], review_list), map(lambda x: x[1], review_list), sinonimi)
-    tf_idf_plot(cur, con, med_name)
-    uses_query(cur, con, 'aa')
+    #tf_idf_plot(cur, con, med_name)
+    uses_query(cur, con, 'infection')
     cur.close()
     con.close()
 
